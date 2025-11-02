@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGL Spammer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #3e8e41;
+        }
+
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>NGL Spammer</h2>
+        <label for="nglUsername">NGL Username:</label>
+        <input type="text" id="nglUsername" placeholder="Enter NGL Username">
+
+        <label for="message">Message:</label>
+        <input type="text" id="message" placeholder="Enter Message">
+
+        <label for="count">Number of Messages:</label>
+        <input type="number" id="count" placeholder="Enter Number of Messages" value="10">
+
+        <button onclick="startSpam()">Start Spam</button>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        async function startSpam() {
+            const nglUsername = document.getElementById('nglUsername').value;
+            const message = document.getElementById('message').value;
+            const count = parseInt(document.getElementById('count').value);
+            const statusDiv = document.getElementById('status');
+
+            if (!nglUsername || !message || isNaN(count) || count <= 0) {
+                statusDiv.textContent = "Please fill in all fields correctly.";
+                return;
+            }
+
+            if (count > 500) {
+                statusDiv.textContent = "Maximum 500 messages per spam!";
+                return;
+            }
+
+            statusDiv.textContent = "Starting spam...\n";
+
+            let sent = 0;
+            let failed = 0;
+            const delay = 1000; // 1 second delay
+            const deviceId = generateDeviceId();
+            const userAgent = getUserAgent();
+
+            for (let i = 0; i < count; i++) {
+                try {
+                    const success = await sendNGLMessage(nglUsername, message, deviceId, userAgent);
+                    if (success) {
+                        sent++;
+                        statusDiv.textContent += `Message ${sent}/${count} sent successfully.\n`;
+                    } else {
+                        failed++;
+                        statusDiv.textContent += `Message ${sent + failed}/${count} failed to send.\n`;
+                    }
+                } catch (error) {
+                    failed++;
+                    statusDiv.textContent += `Message ${sent + failed}/${count} failed with error: ${error.message}\n`;
+                }
+                await sleep(delay);
+            }
+
+            statusDiv.textContent += `\nSpam completed!\nSuccessful: ${sent} messages\nFailed: ${failed} messages`;
+        }
+
+        function generateDeviceId() {
+            const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            const part1 = Array.from({ length: 8 }, () => characters[Math.floor(Math.random() * characters.length)]).join('');
+            const part2 = Array.from({ length: 4 }, () => characters[Math.floor(Math.random() * characters.length)]).join('');
+            const part3 = Array.from({ length: 4 }, () => characters[Math.floor(Math.random() * characters.length)]).join('');
+            const part4 = Array.from({ length: 4 }, () => characters[Math.floor(Math.random() * characters.length)]).join('');
+            const part5 = Array.from({ length: 12 }, () => characters[Math.floor(Math.random() * characters.length)]).join('');
+            return `${part1}-${part2}-${part3}-${part4}-${part5}`;
+        }
+
+        function getUserAgent() {
+            const userAgents = [
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
+            ];
+            return userAgents[Math.floor(Math.random() * userAgents.length)];
+        }
+
+        async function sendNGLMessage(nglUsername, message, deviceId, userAgent) {
+            const url = 'https://ngl.link/api/submit';
+            const headers = {
+                'Host': 'ngl.link',
+                'sec-ch-ua': '"Google Chrome";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
+                'accept': '*/*',
+                'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'x-requested-with': 'XMLHttpRequest',
+                'sec-ch-ua-mobile': '?0',
+                'user-agent': userAgent,
+                'sec-ch-ua-platform': '"Windows"',
+                'origin': 'https://ngl.link',
+                'sec-fetch-site': 'same-origin',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-dest': 'empty',
+                'referer': `https://ngl.link/${nglUsername}`,
+                'accept-language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+            };
+
+            const data = new URLSearchParams();
+            data.append('username', nglUsername);
+            data.append('question', message);
+            data.append('deviceId', deviceId);
+            data.append('gameSlug', '');
+            data.append('referrer', '');
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: data,
+            });
+
+            return response.ok;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>
